@@ -69,12 +69,12 @@ namespace VueFormsApi.Controllers
         }
 
         [HttpGet]
-        [Route("SearchForOwners/{paramString}")]
-        public async Task<List<string>> SearchForOwnersAsync(string paramString)
+        [Route("InclusiveSearchAsync/{query}")]
+        public async Task<List<string>> InclusiveSearchAsync(string query)
         {
             HashSet<Guid> ownersIncluded = new();
 
-            List<string> keywords = paramString.Split(';').ToList();
+            List<string> keywords = query.Split(';').ToList();
 
             List<string> serializedOwners = new();
             foreach (var rawKeyword in keywords)
@@ -99,6 +99,45 @@ namespace VueFormsApi.Controllers
             }
 
             return serializedOwners;
+        }
+        [HttpGet]
+        [Route("ExclusiveSearchAsync/{query}")]
+        public async Task<List<string>> ExclusiveSearchAsync(string query)
+        {
+            List<string> keywords = query.Split(';').ToList();
+
+            List<Owner> owners = new();
+            Dictionary<Guid, int> idAppearances = new();
+            foreach (var rawKeyword in keywords)
+            {
+                string keyword = rawKeyword.ToLower().Trim();
+                Store? targetStore = Mall.stores.FirstOrDefault(x => x.Char == keyword[0]);
+                if (targetStore == null)
+                {
+                    continue;
+                }
+
+                List<Token> tokens = targetStore.Tokens
+                    .Where(x => x.Value.ToLower().Trim().Contains(keyword)).ToList();
+                foreach (var token in tokens)
+                {
+                    owners.Add(token.Owner);
+                    if(!idAppearances.ContainsKey(token.Owner.Id))
+                    {
+                        idAppearances.Add(token.Owner.Id, 1);
+                    }
+                    else
+                    {
+                        idAppearances[token.Owner.Id]++;
+                    }
+                }
+            }
+
+            int targetAppearancesCount = keywords.Count();
+            List<Guid> resultingOwnersList = idAppearances.Where(x => x.Value == targetAppearancesCount).Select(x=>x.Key).ToList();
+            List<string> result = owners.Where(x => resultingOwnersList.Contains(x.Id)).Select(x=>x.JsonString).Distinct().ToList();
+
+            return result;
         }
     }
 }
