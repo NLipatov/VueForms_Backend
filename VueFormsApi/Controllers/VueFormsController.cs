@@ -2,6 +2,7 @@
 using System.Net.Mail;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using VueFormsApi.DataStructureHelpers;
 using VueFormsApi.DataStructures;
 using VueFormsApi.DataStructures.MallStructures;
 
@@ -22,58 +23,16 @@ namespace VueFormsApi.Controllers
         [Route("SaveOwner")]
         public async Task<Guid> SaveOwnerAsync(string JsonObject)
         {
-            Dictionary<string, string>? values = JsonSerializer.Deserialize<Dictionary<string, string>>(JsonObject);
-            if(values != null && values.Any())
-            {
-                Owner owner = new Owner
-                {
-                    Id = Guid.NewGuid(),
-                    JsonString = JsonObject
-                };
-                List<Token> tokens = new();
-                foreach (var value in values)
-                {
-                    Token token = new Token
-                    {
-                        Owner = owner,
-                        Value = value.Value,
-                    };
-                    tokens.Add(token);
-                }
+            return OwnerHelper.SaveNewOwner(_mall, JsonObject);
+        }
 
-                foreach (var token in tokens)
-                {
-                    if(token.Value.Length == 0)
-                    {
-                        continue;
-                    }
+        [HttpGet]
+        [Route("LoadAllOwners")]
+        public async Task<List<Owner>> LoadAllOwnersAsync()
+        {
+            List<Store> stores = _mall.GetStores();
 
-                    Store? store = _mall.GetStores().FirstOrDefault(x => x.Char == Char.ToLower(token.Value[0]));
-                    if (store == null)
-                    {
-                        store = new Store
-                        {
-                            Char = Char.ToLower(token.Value[0]),
-                            Tokens = new()
-                            {
-                                token
-                            }
-                        };
-                    }
-                    else
-                    {
-                        store.Tokens.Add(token);
-                    }
-
-                    _mall.GetStores().Add(store);
-                }
-
-                return owner.Id;
-            }
-            else
-            {
-                throw new ArgumentException("Error: invalid object passed in.");
-            }
+            return OwnerHelper.LoadOwners(stores);
         }
 
         [HttpGet]
@@ -133,22 +92,26 @@ namespace VueFormsApi.Controllers
 
                 List<Token> tokens = targetStore.Tokens
                     .Where(x => x.Value.ToLower().Trim().Contains(keyword)).ToList();
+                HashSet<Guid> alreadyEnlistedOwnerByThisKeyword = new();
                 foreach (var token in tokens)
                 {
                     owners.Add(token.Owner);
-                    if(!idAppearances.ContainsKey(token.Owner.Id))
+                    if(!alreadyEnlistedOwnerByThisKeyword.Contains(token.Owner.Id))
                     {
-                        idAppearances.Add(token.Owner.Id, 1);
-                    }
-                    else
-                    {
-                        idAppearances[token.Owner.Id]++;
+                        if(idAppearances.ContainsKey(token.Owner.Id))
+                        {
+                            idAppearances[token.Owner.Id]++;
+                        }
+                        else
+                        {
+                            idAppearances.Add(token.Owner.Id, 1);
+                        }
+                        alreadyEnlistedOwnerByThisKeyword.Add(token.Owner.Id);
                     }
                 }
             }
 
-            int targetAppearancesCount = keywords.Count();
-            List<Guid> resultingOwnersList = idAppearances.Where(x => x.Value == targetAppearancesCount).Select(x=>x.Key).ToList();
+            List<Guid> resultingOwnersList = idAppearances.Where(x => x.Value == keywords.Count).Select(x=>x.Key).ToList();
             List<string> result = owners.Where(x => resultingOwnersList.Contains(x.Id)).Select(x=>x.JsonString).Distinct().ToList();
 
             return result;
