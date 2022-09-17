@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VueFormsApi", "VueFormsApi\VueFormsApi.csproj", "{49199D29-D120-4E68-B3BC-5F05D97F40AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VueFormsApi", "VueFormsApi\VueFormsApi.csproj", "{49199D29-D120-4E68-B3BC-5F05D97F40AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VueFormsApi.Tests", "VueFormsApi.Tests\VueFormsApi.Tests.csproj", "{7187CD94-6269-485B-AE56-139380CA810B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{49199D29-D120-4E68-B3BC-5F05D97F40AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49199D29-D120-4E68-B3BC-5F05D97F40AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49199D29-D120-4E68-B3BC-5F05D97F40AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7187CD94-6269-485B-AE56-139380CA810B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7187CD94-6269-485B-AE56-139380CA810B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7187CD94-6269-485B-AE56-139380CA810B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7187CD94-6269-485B-AE56-139380CA810B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

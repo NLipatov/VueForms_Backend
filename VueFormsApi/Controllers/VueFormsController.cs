@@ -3,6 +3,7 @@ using System.Net.Mail;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using VueFormsApi.DataStructures;
+using VueFormsApi.DataStructures.MallStructures;
 
 namespace VueFormsApi.Controllers
 {
@@ -10,6 +11,13 @@ namespace VueFormsApi.Controllers
     [Route("[controller]")]
     public class VueFormsController : ControllerBase
     {
+        private readonly IMall _mall;
+
+        public VueFormsController(IMall mall)
+        {
+            _mall = mall;
+        }
+
         [HttpPost]
         [Route("SaveOwner")]
         public async Task<Guid> SaveOwnerAsync(string JsonObject)
@@ -40,7 +48,7 @@ namespace VueFormsApi.Controllers
                         continue;
                     }
 
-                    Store? store = Mall.stores.FirstOrDefault(x => x.Char == Char.ToLower(token.Value[0]));
+                    Store? store = _mall.GetStores().FirstOrDefault(x => x.Char == Char.ToLower(token.Value[0]));
                     if (store == null)
                     {
                         store = new Store
@@ -57,7 +65,7 @@ namespace VueFormsApi.Controllers
                         store.Tokens.Add(token);
                     }
 
-                    Mall.stores.Add(store);
+                    _mall.GetStores().Add(store);
                 }
 
                 return owner.Id;
@@ -79,8 +87,14 @@ namespace VueFormsApi.Controllers
             List<string> serializedOwners = new();
             foreach (var rawKeyword in keywords)
             {
+                if(String.IsNullOrWhiteSpace(rawKeyword))
+                {
+                    continue;
+                }
+
                 string keyword = rawKeyword.ToLower().Trim();
-                Store? targetStore = Mall.stores.FirstOrDefault(x=>x.Char == keyword[0]);
+                Store? targetStore = _mall.GetStores().FirstOrDefault(x=>x.Char == keyword[0]);
+
                 if(targetStore == null)
                 {
                     continue;
@@ -111,7 +125,7 @@ namespace VueFormsApi.Controllers
             foreach (var rawKeyword in keywords)
             {
                 string keyword = rawKeyword.ToLower().Trim();
-                Store? targetStore = Mall.stores.FirstOrDefault(x => x.Char == keyword[0]);
+                Store? targetStore = _mall.GetStores().FirstOrDefault(x => x.Char == keyword[0]);
                 if (targetStore == null)
                 {
                     continue;
