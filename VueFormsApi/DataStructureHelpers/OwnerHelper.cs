@@ -10,13 +10,13 @@ namespace VueFormsApi.DataStructureHelpers
     {
         public static List<Owner> LoadOwners(List<Store> stores)
         {
-            HashSet<Owner> traversedOwners = new();
+            List<Owner> traversedOwners = new();
             foreach (var store in stores)
             {
                 foreach (var token in store.Tokens)
                 {
                     var owner = token.Owner;
-                    if (traversedOwners.Contains(owner))
+                    if (traversedOwners.Any(x=>x.Id == owner.Id))
                     {
                         continue;
                     }

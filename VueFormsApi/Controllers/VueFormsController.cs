@@ -36,6 +36,30 @@ namespace VueFormsApi.Controllers
         }
 
         [HttpGet]
+        [Route("DefineTableColumns")]
+        public async Task<HashSet<string>> DefineTableColumnsAsync()
+        {
+            HashSet<string> tableColumns = new();
+
+            var owners = await LoadAllOwnersAsync();
+            List<string> ownersSerialized = new();
+            foreach (var owner in owners)
+            {
+                var kVPairs = JsonSerializer.Deserialize<Dictionary<string, string>>(owner.JsonString);
+                foreach (var pair in kVPairs)
+                {
+                    if(!tableColumns.Contains(pair.Key))
+                    {
+                        tableColumns.Add(pair.Key);
+                    }
+                }
+            }
+
+
+            return tableColumns;
+        }
+
+        [HttpGet]
         [Route("InclusiveSearchAsync/{query}")]
         public async Task<List<string>> InclusiveSearchAsync(string query)
         {

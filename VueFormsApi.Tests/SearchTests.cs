@@ -29,6 +29,22 @@ namespace VueFormsApi.Tests
         }
 
         [Theory]
+        [InlineData(8)]
+        public async void DefineTableColumns(int expected)
+        {
+            using var mock = AutoMock.GetLoose();
+            mock.Mock<IMall>()
+                .Setup(x => x.GetStores())
+                .Returns(GetSampleStores()!);
+
+            var cls = mock.Create<VueFormsController>();
+
+            var actual = await cls.DefineTableColumnsAsync();
+
+            Assert.Equal(actual.Count, expected);
+        }
+
+        [Theory]
         [InlineData("Lipatov", 1)]
         [InlineData("Russia; litvinov", 3)]
         [InlineData("Russia", 3)]
